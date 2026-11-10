@@ -1,0 +1,50 @@
+name = "cash-engine"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# Create the DB once:  npx wrangler d1 create cash-engine
+# then paste the database_id it prints below.
+[[d1_databases]]
+binding = "DB"
+database_name = "cash-engine"
+database_id = "PASTE_DATABASE_ID_HERE"
+
+# Workers AI: powers the closer chat and the email agent (free daily allowance; scripted answers if it runs out)
+[ai]
+binding = "AI"
+
+# Evening digest on your phone: 19:00 UTC = 20:00 Paris (winter)
+[triggers]
+crons = ["0 19 * * *"]
+
+# Client sites live instantly on <name>.<CLIENT_ZONE> after payment.
+# Needs a domain on Cloudflare + a proxied wildcard DNS record "*" (AAAA 100::). Uncomment and set yours:
+# routes = [
+#   { pattern = "*.studiorive.fr/*", zone_name = "studiorive.fr" },
+# ]
+
+[vars]
+PUBLIC_URL    = "https://cash-engine.YOURNAME.workers.dev"   # where demos live (used in emails / pushes)
+DEMO_HOST     = ""                       # set to your demo hostname once you use a custom domain, e.g. "demo.studiorive.fr"
+AGENCY_NAME   = "Studio Rive"            # your trading name, shown on demos and emails
+AGENCY_PERSON = "Prénom"                 # the human signing the messages
+AGENCY_PHONE  = "06 00 00 00 00"
+OFFER_PRICE   = "390 €"                  # one-off setup
+OFFER_MONTHLY = "19 €/mois"              # hosting + edits; this is the recurring money
+OFFER_DELAY   = "48 h"
+OFFER_INCLUDES   = ""                    # extra facts the AI may state, e.g. "fiche Google Business Profile mise à jour"
+OFFER_GUARANTEE  = ""                    # e.g. "remboursé sous 14 jours si le site ne vous convient pas" (only if you honour it)
+OFFER_CONCESSION = ""                    # the ONE gesture the AI may offer on price hesitation, e.g. "le premier mois offert"
+CHECKOUT_URL  = ""                       # Stripe Payment Link (one-off setup + monthly subscription)
+DEMO_DAYS     = "14"                     # demo self-destructs N days after first contact (urgency)
+CLIENT_ZONE   = ""                       # e.g. "studiorive.fr" -> paid sites go live on <name>.studiorive.fr
+REPLY_DOMAIN  = ""                       # e.g. "studiorive.fr": replies to reply+<slug>@ go to the AI inbox
+AUTO_REPLY    = "1"                      # 1 = the AI answers interested/question emails itself; 0 = drafts only
+FORWARD_TO    = ""                       # your real inbox (verified in Email Routing): every reply is copied there
+CHAT_CAP      = "40"                     # max AI chat answers per demo (abuse cap)
+AI_MODEL      = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+
+# Secrets (never commit):
+#   npx wrangler secret put ADMIN_KEY               -> long random string, also used by the pipeline
+#   npx wrangler secret put NTFY_TOPIC              -> random topic name, subscribe to it in the ntfy app
+#   npx wrangler secret put STRIPE_WEBHOOK_SECRET   -> whsec_... from the Stripe webhook you create

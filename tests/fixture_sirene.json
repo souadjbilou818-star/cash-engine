@@ -1,0 +1,16 @@
+{"results": [
+ {"_pc":"75011","_naf":"56.10A","siren":"900000001","nom_complet":"LE COMPTOIR DE LEA","nom_raison_sociale":"LE COMPTOIR DE LEA","nature_juridique":"5710","nombre_etablissements_ouverts":1,
+  "matching_etablissements":[{"siret":"90000000100011","activite_principale":"56.10A","adresse":"27 RUE OBERKAMPF 75011 PARIS","code_postal":"75011","date_creation":"2026-10-02","etat_administratif":"A","latitude":"48.8649","longitude":"2.3714","liste_enseignes":["LE COMPTOIR DE LÉA"]}]},
+ {"_pc":"75011","_naf":"96.02A","siren":"900000002","nom_complet":"MARIE DURAND","nom_raison_sociale":null,"nature_juridique":"1000","nombre_etablissements_ouverts":1,
+  "matching_etablissements":[{"siret":"90000000200011","activite_principale":"96.02A","adresse":"3 RUE SAINT-MAUR 75011 PARIS","code_postal":"75011","date_creation":"2026-09-01","etat_administratif":"A","latitude":"48.86","longitude":"2.38","liste_enseignes":null}]},
+ {"_pc":"75011","_naf":"96.02A","siren":"900000003","nom_complet":"KARIM BENALI","nom_raison_sociale":null,"nature_juridique":"1000","nombre_etablissements_ouverts":1,
+  "matching_etablissements":[{"siret":"90000000300011","activite_principale":"96.02A","adresse":"88 BOULEVARD VOLTAIRE 75011 PARIS","code_postal":"75011","date_creation":"2026-08-20","etat_administratif":"A","latitude":"48.858","longitude":"2.381","liste_enseignes":["STUDIO BOUCLES"]}]},
+ {"_pc":"75011","_naf":"56.10A","siren":"900000004","nom_complet":"BIG CHAIN SAS","nom_raison_sociale":"BIG CHAIN SAS","nature_juridique":"5710","nombre_etablissements_ouverts":12,
+  "matching_etablissements":[{"siret":"90000000400011","activite_principale":"56.10A","adresse":"1 PLACE DE LA BASTILLE 75011 PARIS","code_postal":"75011","date_creation":"2026-10-15","etat_administratif":"A","latitude":"48.853","longitude":"2.369","liste_enseignes":["BIG CHAIN"]}]},
+ {"_pc":"75011","_naf":"56.10A","siren":"900000005","nom_complet":"VIEUX BISTROT","nom_raison_sociale":"VIEUX BISTROT","nature_juridique":"5499","nombre_etablissements_ouverts":1,
+  "matching_etablissements":[{"siret":"90000000500011","activite_principale":"56.10A","adresse":"9 RUE DE LAPPE 75011 PARIS","code_postal":"75011","date_creation":"2015-03-01","etat_administratif":"A","latitude":"48.854","longitude":"2.372","liste_enseignes":["VIEUX BISTROT"]}]},
+ {"_pc":"75011","_naf":"56.10A","siren":"900000006","nom_complet":"[NON-DIFFUSIBLE]","statut_diffusion":"P","nature_juridique":"1000","nombre_etablissements_ouverts":1,
+  "matching_etablissements":[{"siret":"90000000600011","activite_principale":"56.10A","adresse":"[NON-DIFFUSIBLE]","code_postal":"75011","date_creation":"2026-10-01","etat_administratif":"A","liste_enseignes":null}]},
+ {"_pc":"75011","_naf":"56.10A","siren":"900000007","nom_complet":"NADIA SAS","nom_raison_sociale":"NADIA SAS","nature_juridique":"5710","nombre_etablissements_ouverts":1,
+  "matching_etablissements":[{"siret":"90000000700011","activite_principale":"56.10A","adresse":"12 RUE DE LA ROQUETTE 75011 PARIS","code_postal":"75011","date_creation":"2026-07-01","etat_administratif":"A","latitude":"48.8566","longitude":"2.3791","liste_enseignes":["CHEZ NADIA"]}]}
+]}

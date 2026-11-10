@@ -1,0 +1,46 @@
+name: daily-run
+on:
+  schedule:
+    - cron: "23 5 * * 1-6"   # 06:23 Paris (winter) / 07:23 (summer), Monday to Saturday
+  workflow_dispatch: {}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      WORKER_URL: ${{ secrets.WORKER_URL }}
+      ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASS: ${{ secrets.SMTP_PASS }}
+      FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+      FROM_NAME: ${{ vars.FROM_NAME }}
+      REPLY_DOMAIN: ${{ vars.REPLY_DOMAIN }}
+      LEAD_SOURCES: ${{ vars.LEAD_SOURCES }}
+      SIRENE_DAYS: ${{ vars.SIRENE_DAYS }}
+      OFFER_DELAY: ${{ vars.OFFER_DELAY }}
+      EMAIL_DAILY_CAP: ${{ vars.EMAIL_DAILY_CAP }}
+      AGENCY_NAME: ${{ vars.AGENCY_NAME }}
+      AGENCY_PERSON: ${{ vars.AGENCY_PERSON }}
+      AGENCY_PHONE: ${{ vars.AGENCY_PHONE }}
+      OFFER_PRICE: ${{ vars.OFFER_PRICE }}
+      OFFER_MONTHLY: ${{ vars.OFFER_MONTHLY }}
+      CATEGORIES: ${{ vars.CATEGORIES }}
+      POSTCODES: ${{ vars.POSTCODES }}
+      DAILY_MAX: ${{ vars.DAILY_MAX }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Find, qualify, write, push demos
+        run: python3 pipeline/engine.py run
+      - name: Send today's emails + due follow-ups (only if repo variable SEND_EMAILS = 1)
+        if: ${{ vars.SEND_EMAILS == '1' }}
+        run: python3 pipeline/engine.py send --really
