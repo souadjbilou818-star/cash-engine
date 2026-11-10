@@ -11,35 +11,50 @@ ok()   { printf "${G}✓${N} %s\n" "$*"; }
 warn() { printf "${Y}!${N} %s\n" "$*"; }
 die()  { printf "${R}✗ %s${N}\n" "$*" >&2; exit 1; }
 
+# French keyboards + web terminals: make sure accents and backspace behave
+case "${LC_ALL:-${LANG:-}}" in
+  *[Uu][Tt][Ff]*) ;;
+  *) if locale -a 2>/dev/null | grep -qiE '^c\.utf-?8$'; then export LANG=C.UTF-8 LC_ALL=C.UTF-8; fi ;;
+esac
+export PYTHONUTF8=1
+if [ -t 0 ]; then stty iutf8 2>/dev/null || true; fi
+
 touch .env && chmod 600 .env
 getv() { grep -E "^$1=" .env 2>/dev/null | tail -1 | cut -d= -f2- || true; }
-setv() {  # setv KEY VALUE  (writes .env, exports)
-  python3 - "$1" "$2" <<'PY'
-import sys, pathlib
-k, v = sys.argv[1], sys.argv[2]
-p = pathlib.Path(".env"); lines = p.read_text().splitlines() if p.exists() else []
+setv() {  # setv KEY VALUE  (writes .env atomically, exports the cleaned value)
+  local clean
+  clean=$(python3 - "$1" "$2" <<'PY'
+import os, re, sys, pathlib
+k = sys.argv[1]
+# half-erased accents (e.g. a stray byte from "à") and control chars are dropped, not saved
+v = sys.argv[2].encode("utf-8", "surrogateescape").decode("utf-8", "ignore")
+v = re.sub(r"[\x00-\x1f\x7f]", "", v).strip()
+p = pathlib.Path(".env"); lines = p.read_text(encoding="utf-8", errors="ignore").splitlines() if p.exists() else []
 out, done = [], False
 for l in lines:
     if l.startswith(k + "="):
         if not done: out.append(f"{k}={v}"); done = True
     else: out.append(l)
 if not done: out.append(f"{k}={v}")
-p.write_text("\n".join(out) + "\n")
+tmp = p.with_suffix(".tmp"); tmp.write_text("\n".join(out) + "\n", encoding="utf-8"); os.chmod(tmp, 0o600); tmp.replace(p)
+print(v)
 PY
-  export "$1=$2"
+) || die "Could not save $1 to .env"
+  export "$1=$clean"
 }
 ask() {  # ask KEY "Question" [default] [secret]
   local k=$1 q=$2 def=${3:-} secret=${4:-} cur val
   cur="${!k:-}"; [ -z "$cur" ] && cur=$(getv "$k")
-  if [ -n "$cur" ]; then export "$k=$cur"; return; fi
+  if [ -n "$cur" ]; then setv "$k" "$cur"; return; fi
   if [ ! -t 0 ]; then setv "$k" "$def"; return; fi
-  if [ -n "$secret" ]; then read -rsp "  $q${def:+ [$def]}: " val; echo; else read -rp "  $q${def:+ [$def]}: " val; fi
+  if [ -n "$secret" ]; then read -rsp "  $q${def:+ [$def]}: " val; echo; else read -erp "  $q${def:+ [$def]}: " val; fi
   setv "$k" "${val:-$def}"
 }
 toml_var() {  # toml_var KEY VALUE -> sets KEY = "VALUE" under [vars] in worker/wrangler.toml
   python3 - "$1" "$2" <<'PY'
 import re, sys, pathlib
-k, v = sys.argv[1], sys.argv[2].replace('"', '\\"')
+k = sys.argv[1]
+v = sys.argv[2].encode("utf-8", "surrogateescape").decode("utf-8", "ignore").replace('"', '\\"')
 p = pathlib.Path("worker/wrangler.toml"); s = p.read_text()
 pat = re.compile(rf'^({re.escape(k)}\s*=\s*)"[^"\n]*"', re.M)
 s = pat.sub(lambda m: f'{m.group(1)}"{v}"', s, count=1) if pat.search(s) else s.replace("[vars]\n", f'[vars]\n{k} = "{v}"\n', 1)
@@ -73,7 +88,19 @@ WR="npx -y wrangler@4"
 step "2/7 Who you are (shown on demos and in every message)"
 ask AGENCY_NAME   "Trading name" "Studio Rive"
 ask AGENCY_PERSON "Your first name (signs the messages)" "Sami"
-ask AGENCY_PHONE  "Your phone, French format" "06 00 00 00 00"
+fr_phone() { python3 -c '
+import re, sys
+d = re.sub(r"\D", "", sys.argv[1])
+if d.startswith("33") and len(d) == 11: d = "0" + d[2:]
+print(" ".join(d[i:i+2] for i in range(0, 10, 2)) if re.fullmatch(r"0[1-9]\d{8}", d) else "")' "$1"; }
+while :; do
+  ask AGENCY_PHONE "Your phone, e.g. 07 51 19 96 11" ""
+  p=$(fr_phone "$AGENCY_PHONE")
+  if [ -n "$p" ]; then setv AGENCY_PHONE "$p"; break; fi
+  warn "That doesn't look like a French number (10 digits starting with 0). Try again."
+  setv AGENCY_PHONE ""; unset AGENCY_PHONE
+  [ -t 0 ] || die "AGENCY_PHONE missing"
+done
 ask OFFER_PRICE   "Setup price" "390 €"
 ask OFFER_MONTHLY "Monthly price" "19 €/mois"
 ask OFFER_DELAY   "Delivery delay" "48 h"
